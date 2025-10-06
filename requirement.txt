@@ -1,15 +1,8 @@
-# requirements.txt
-
-# For FastAPI API
 fastapi
 uvicorn
 pydantic
-
-# For Streamlit UI
 streamlit
 requests
-
-# For the AI Model (shared by API)
 transformers
 torch
 sentencepiece
