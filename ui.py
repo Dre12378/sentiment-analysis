@@ -7,7 +7,7 @@ import json
 # --- CONFIGURATION ---
 # Replace this with the actual URL your Vercel deployment gives you.
 # It's crucial that this URL points to your live FastAPI back-end.
-API_URL = "/api/analyze-financial-sentiment" 
+API_URL = "http://127.0.0.1:8000/analyze-financial-sentiment" 
 
 
 # --- HELPER FUNCTION ---

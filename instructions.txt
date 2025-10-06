@@ -1,0 +1,16 @@
+Change URL if using on env
+
+http://127.0.0.1:8000/analyze-financial-sentiment
+
+Use commands below to open serverless back end:
+
+Create virtual environment:
+# For Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+#Side note if you need to install the requirements
+pip install -r requirements.txt
+
+
+uvicorn api.index:app --reload

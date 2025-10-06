@@ -21,6 +21,28 @@ Data Validation: Employs Pydantic for robust, type-hinted validation of API requ
 
 Easy Integration: Provides a simple JSON-based RESTful endpoint for easy integration into trading algorithms, dashboards, or research platforms.
 
+# API Usage
+
+Once the application is running (either locally or on Vercel), you can send `POST` requests to the `/analyze-financial-sentiment` endpoint.
+
+**Endpoint:** `/analyze-financial-sentiment`
+
+**Method:** `POST`
+
+**Body:**
+
+```json
+{
+  "text": "Your financial news headline here"
+}
+```
+
+## Example with cURL (Local)
+
+```bash
+curl -X POST "http://127.0.0.1:8000/analyze-financial-sentiment" -H "Content-Type: application/json" -d '{"text": "Interest rates are expected to rise next quarter."}'
+```
+
 # How To Run locally
 
 to run this you need to create first a virtual environment:
@@ -40,3 +62,5 @@ pip install -r requirement.txt
 - Run dev server
 
 uvicorn api.index:app --reload
+
+The local server will be available at `http://127.0.0.1:8000`.
