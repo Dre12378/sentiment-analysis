@@ -20,3 +20,23 @@ Serverless Deployment: Hosted on Vercel for infinite scalability and zero server
 Data Validation: Employs Pydantic for robust, type-hinted validation of API requests.
 
 Easy Integration: Provides a simple JSON-based RESTful endpoint for easy integration into trading algorithms, dashboards, or research platforms.
+
+# How To Run locally
+
+to run this you need to create first a virtual environment:
+
+- For macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+
+- For Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+- Install dependencies
+
+pip install -r requirement.txt
+
+- Run dev server
+
+uvicorn api.index:app --reload
