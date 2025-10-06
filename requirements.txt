@@ -1,8 +1,17 @@
+# requirements.txt
+
+# This special line tells pip to look for PyTorch wheels in a specific repository 
+# that contains the smaller, CPU-only versions.
+--index-url https://download.pytorch.org/whl/cpu
+
+# Now we list torch. The --no-cache-dir flag can also help with memory usage.
+torch --no-cache-dir
+
+# The rest of our packages remain the same
 fastapi
 uvicorn
 pydantic
 streamlit
 requests
 transformers
-torch
 sentencepiece
