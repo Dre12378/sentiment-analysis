@@ -86,3 +86,7 @@ Run UI command via Streamlit:
 - streamlit run ui.py
 
 Most likely it will run as http://localhost:8501/
+
+# Sample Look:
+
+<img width="744" height="801" alt="image" src="https://github.com/user-attachments/assets/fae93a72-5647-4711-92ca-6612d1066afd" />
