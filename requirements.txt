@@ -5,7 +5,7 @@
 --index-url https://download.pytorch.org/whl/cpu
 
 # Now we list torch. The --no-cache-dir flag can also help with memory usage.
-torch --no-cache-dir
+torch
 
 # The rest of our packages remain the same
 fastapi
