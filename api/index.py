@@ -13,7 +13,7 @@ app = FastAPI()
 try:
     sentiment_pipeline = pipeline(
         "sentiment-analysis", 
-        model="cardiffnlp/twitter-roberta-base-sentiment-latest"
+        model="distilbert-base-uncased-finetuned-sst-2-english"
     )
     model_ready = True
 except Exception as e:
