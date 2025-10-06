@@ -55,12 +55,34 @@ source venv/bin/activate
 python -m venv venv
 .\venv\Scripts\activate
 
-- Install dependencies
+Install dependencies:
 
-pip install -r requirement.txt
+- python -m pip install --upgrade pip
 
-- Run dev server
+- pip install -r requirement.txt
 
-uvicorn api.index:app --reload
+Run dev server:
+
+- uvicorn api.index:app --reload
 
 The local server will be available at `http://127.0.0.1:8000`.
+
+# Run UI
+
+To Run the UI for the analysis:
+
+Open another CMD and reinstall dependencies:
+
+- For Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+- python -m pip install --upgrade pip
+
+- pip install -r requirement.txt
+
+Run UI command via Streamlit:
+
+- streamlit run ui.py
+
+Most likely it will run as http://localhost:8501/
