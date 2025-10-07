@@ -39,7 +39,10 @@ def process_ner_results(entities):
 st.set_page_config(page_title="Financial Sentiment Analyzer", page_icon="📈", layout="wide")
 st.title("📈 Financial News Sentiment & Entity Analyzer")
 
+st.subheader("Analyze Financial News with Hugging Face Transformers")
 st.info("This tool analyzes multiple headlines and extracts key entities like organizations (ORG) and people (PER).")
+st.warning("Please note: The backend is hosted on a free service (Render) and may take a minute to 'wake up' on the first request if it has been inactive. Subsequent analyses will be much faster.")
+
 
 user_input = st.text_area(
     "Enter one or more financial news headlines (one per line):",
@@ -91,4 +94,3 @@ if st.button("Analyze Headlines"):
                         st.markdown(f"**{entity_type}:** `{', '.join(words)}`")
                 else:
                     st.text("No entities found.")
-
