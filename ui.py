@@ -3,7 +3,7 @@ import requests
 
 # --- CONFIGURATION ---
 # This URL points to our local back-end API server.
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = "https://sentiment-analysis-hhcd.onrender.com"
 SENTIMENT_ENDPOINT = f"{API_BASE_URL}/analyze-sentiment"
 NER_ENDPOINT = f"{API_BASE_URL}/extract-entities"
 
