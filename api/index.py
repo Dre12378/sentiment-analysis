@@ -1,48 +1,50 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import pipeline
+import requests
 import os
 
-# Initialize the FastAPI app
+# --- Configuration ---
 app = FastAPI()
 
-# --- Model Loading ---
-# We load the model once when the application starts.
-# This is more efficient than loading it on every request.
-# The pipeline will download the model on the first run.
-try:
-    sentiment_pipeline = pipeline(
-        "sentiment-analysis", 
-        model="distilbert-base-uncased-finetuned-sst-2-english"
-    )
-    model_ready = True
-except Exception as e:
-    print(f"Error loading model: {e}")
-    model_ready = False
+# Get your Hugging Face API token from environment variables
+HF_TOKEN = os.getenv("HF_TOKEN")
+if not HF_TOKEN:
+    raise ValueError("Hugging Face API token not found. Please set the HF_TOKEN environment variable.")
 
+# Define the models we'll use from the Hugging Face Inference API
+SENTIMENT_API_URL = "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest"
+NER_API_URL = "https://api-inference.huggingface.co/models/dslim/bert-base-NER"
 
-# --- Pydantic Model for Request Body ---
-# This defines the expected data structure for incoming requests.
-# It ensures that any request to our endpoint must have a "text" field which is a string.
-class NewsArticle(BaseModel):
-    text: str
+HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
 
+# --- Pydantic Models for incoming data validation ---
+class TextPayload(BaseModel):
+    inputs: str
 
 # --- API Endpoints ---
+
 @app.get("/")
 def read_root():
-    return {"status": "ok", "model_ready": model_ready}
+    """ A simple health-check endpoint. """
+    return {"status": "ok", "message": "API is running"}
 
 
-@app.post("/analyze-financial-sentiment")
-def analyze_sentiment(article: NewsArticle):
+@app.post("/analyze-sentiment")
+def analyze_sentiment_single(payload: TextPayload):
     """
-    Analyzes the sentiment of a given financial news headline.
+    Analyzes the sentiment of a SINGLE text. This endpoint is called by the front-end.
     """
-    if not model_ready:
-        return {"error": "Model is not available."}
-    
-    # The pipeline returns a list, so we take the first element.
-    # The result from this model will be 'positive', 'negative', or 'neutral'.
-    result = sentiment_pipeline(article.text)[0]
-    return result
+    response = requests.post(SENTIMENT_API_URL, headers=HEADERS, json=payload.dict())
+    response.raise_for_status()  # This will raise an error for bad responses (4xx or 5xx)
+    return response.json()
+
+
+@app.post("/extract-entities")
+def extract_entities(payload: TextPayload):
+    """
+    Extracts named entities from a single text.
+    """
+    response = requests.post(NER_API_URL, headers=HEADERS, json=payload.dict())
+    response.raise_for_status()
+    return response.json()
+

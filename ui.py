@@ -1,85 +1,94 @@
-# ui.py
-
 import streamlit as st
 import requests
-import json
 
 # --- CONFIGURATION ---
-# Replace this with the actual URL your Vercel deployment gives you.
-# It's crucial that this URL points to your live FastAPI back-end.
-API_URL = "http://127.0.0.1:8000/analyze-financial-sentiment" 
+# This URL points to our local back-end API server.
+API_BASE_URL = "http://127.0.0.1:8000"
+SENTIMENT_ENDPOINT = f"{API_BASE_URL}/analyze-sentiment"
+NER_ENDPOINT = f"{API_BASE_URL}/extract-entities"
 
-
-# --- HELPER FUNCTION ---
-def call_sentiment_api(text_to_analyze):
-    """
-    Sends text to our FastAPI back-end for analysis and returns the result.
-    """
-    # The data we are sending in the POST request.
-    # It needs to match the Pydantic model in our FastAPI app.
-    payload = {"text": text_to_analyze}
-    
+# --- HELPER FUNCTIONS ---
+def call_api(endpoint, payload):
+    """A reusable function to call our API endpoints."""
     try:
-        # Make the POST request to our API.
-        # json.dumps converts our Python dictionary to a JSON string.
-        response = requests.post(API_URL, data=json.dumps(payload))
-        
-        # If the request was successful (status code 200)
-        if response.status_code == 200:
-            # Return the JSON response from the API
-            return response.json()
-        else:
-            # If the API returned an error, show it on the UI
-            st.error(f"Error from API: {response.status_code} - {response.text}")
-            return None
-            
+        response = requests.post(endpoint, json=payload)
+        response.raise_for_status()  # This will raise an error for bad responses (4xx or 5xx)
+        return response.json()
     except requests.exceptions.RequestException as e:
-        # Handle connection errors (e.g., API is down, no internet)
-        st.error(f"Connection Error: Could not reach the API. Details: {e}")
+        st.error(f"Connection Error: Could not reach the API. Is the back-end server running? Details: {e}")
+        return None
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
         return None
 
+def process_ner_results(entities):
+    """A helper function to clean up and group the raw results from the NER model."""
+    if not entities or not isinstance(entities, list):
+        return {}
+    grouped_entities = {}
+    for entity in entities:
+        entity_type = entity.get('entity_group')
+        word = entity.get('word')
+        if entity_type and word:
+            if entity_type not in grouped_entities:
+                grouped_entities[entity_type] = []
+            grouped_entities[entity_type].append(word)
+    return grouped_entities
 
 # --- STREAMLIT APP INTERFACE ---
+st.set_page_config(page_title="Financial Sentiment Analyzer", page_icon="📈", layout="wide")
+st.title("📈 Financial News Sentiment & Entity Analyzer")
 
-# Set the title of the web app
-st.title("📈 Financial News Sentiment Analyzer")
-st.subheader("A front-end for the sentiment analysis API tailored for JPMorgan")
+st.info("This tool analyzes multiple headlines and extracts key entities like organizations (ORG) and people (PER).")
 
-# Create a text area for user input
 user_input = st.text_area(
-    "Enter a financial news headline to analyze:", 
-    "Federal Reserve hints at interest rate cuts, boosting market confidence."
+    "Enter one or more financial news headlines (one per line):",
+    "Federal Reserve hints at interest rate cuts, boosting market confidence.\nApple Inc. is expected to release its new iPhone next quarter, says Tim Cook.\nBerkshire Hathaway reports record earnings from its operations in Omaha.",
+    height=150
 )
 
-# Create a button. The code inside this 'if' block runs when the button is clicked.
-if st.button("Analyze Sentiment"):
-    if not user_input.strip():
-        # Check if the user has entered any text
-        st.warning("Please enter some text to analyze.")
+if st.button("Analyze Headlines"):
+    headlines = [line.strip() for line in user_input.split('\n') if line.strip()]
+    if not headlines:
+        st.warning("Please enter at least one headline.")
     else:
-        # Show a spinner while we wait for the API response
-        with st.spinner("Analyzing..."):
-            # Call our helper function to get the sentiment from the API
-            result = call_sentiment_api(user_input)
+        st.subheader("Analysis Results")
+        for i, headline in enumerate(headlines):
+            st.markdown(f"---")
+            st.markdown(f"**Headline {i+1}:** *{headline}*")
+            cols = st.columns(2)
             
-            if result:
-                # If we got a result back, display it
-                st.subheader("Analysis Result:")
+            with cols[0]:
+                st.markdown("**Sentiment**")
+                with st.spinner(f"Analyzing sentiment for headline {i+1}..."):
+                    sentiment_payload = {"inputs": headline}
+                    sentiment_results = call_api(SENTIMENT_ENDPOINT, sentiment_payload)
                 
-                label = result.get('label', 'N/A').upper()
-                score = result.get('score', 0)
-                
-                # Display the result with some nice formatting
-                if label == 'POSITIVE':
-                    st.success(f"Sentiment: {label}")
-                elif label == 'NEGATIVE':
-                    st.error(f"Sentiment: {label}")
+                if sentiment_results and isinstance(sentiment_results, list):
+                    sentiment_result_list = sentiment_results[0]
+                    if sentiment_result_list:
+                        sentiment = sentiment_result_list[0]
+                        label = sentiment['label'].upper()
+                        score = sentiment['score']
+                        if label == 'POSITIVE':
+                            st.success(f"{label} (Confidence: {score:.2%})")
+                        elif label == 'NEGATIVE':
+                            st.error(f"{label} (Confidence: {score:.2%})")
+                        else:
+                            st.info(f"{label} (Confidence: {score:.2%})")
                 else:
-                    st.info(f"Sentiment: {label}")
+                    st.error("Failed to get sentiment result.")
+
+            with cols[1]:
+                st.markdown("**Extracted Entities**")
+                with st.spinner(f"Extracting entities for headline {i+1}..."):
+                     ner_payload = {"inputs": headline}
+                     ner_results = call_api(NER_ENDPOINT, ner_payload)
                 
-                # Display the confidence score as a progress bar
-                st.progress(score, text=f"Confidence: {score:.2%}")
-                
-                # Show the raw JSON response for technical users
-                with st.expander("Show Raw API Response"):
-                    st.json(result)
+                entities = process_ner_results(ner_results)
+                if entities:
+                    for entity_type, words in entities.items():
+                        st.markdown(f"**{entity_type}:** `{', '.join(words)}`")
+                else:
+                    st.text("No entities found.")
+
