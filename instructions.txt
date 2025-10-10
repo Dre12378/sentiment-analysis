@@ -1,78 +1,16 @@
-# Local Development Instructions
+Change URL if using on env
 
-This document provides a streamlined guide for running the API and UI on your local machine.
+http://127.0.0.1:8000/analyze-financial-sentiment
 
-## 1. Backend API Setup
+Use commands below to open serverless back end:
 
-### Step 1: Create Virtual Environment
-Create and activate a Python virtual environment to keep dependencies isolated.
-
-```bash
-# For macOS/Linux:
-python3 -m venv venv
-source venv/bin/activate
-
-# For Windows:
+Create virtual environment:
+# For Windows
 python -m venv venv
 .\venv\Scripts\activate
-```
 
-### Step 2: Install Dependencies
-Install all required packages from the `requirements.txt` file.
-
-```bash
+#Side note if you need to install the requirements
 pip install -r requirements.txt
-```
 
-### Step 3: Set Hugging Face API Token (Crucial)
-The API requires a token to authenticate with the Hugging Face Inference API.
 
-```bash
-# For macOS/Linux:
-export HF_TOKEN="your_hugging_face_api_token_here"
-
-# For Windows:
-set HF_TOKEN="your_hugging_face_api_token_here"
-```
-
-### Step 4: Run the API Server
-Start the FastAPI server. It will automatically reload when you make code changes.
-
-```bash
 uvicorn api.index:app --reload
-```
-Your API is now running at `http://127.0.0.1:8000`.
-
----
-
-## 2. Frontend UI Setup
-
-The UI runs in a separate terminal and connects to the backend API.
-
-### Step 1: Set API URL for UI
-In a **new terminal**, tell the Streamlit UI to connect to your local API server.
-
-```bash
-# For macOS/Linux:
-export API_BASE_URL="http://127.0.0.1:8000"
-
-# For Windows:
-set API_BASE_URL="http://127.0.0.1:8000"
-```
-*(Note: If you skip this, the UI will try to connect to the production URL by default.)*
-
-### Step 2: Run the Streamlit App
-Make sure you are in the same project directory and your virtual environment is active.
-
-```bash
-streamlit run ui.py
-```
-Your UI is now running, likely at `http://localhost:8501`.
-
----
-
-## API Endpoints (for testing with tools like cURL or Postman)
-
-- **Single Analysis:** `POST http://127.0.0.1:8000/analyze-financial-sentiment`
-- **Batch Analysis:** `POST http://127.0.0.1:8000/analyze-financial-sentiment-batch`
-- **Entity Extraction:** `POST http://127.0.0.1:8000/extract-financial-entities`
