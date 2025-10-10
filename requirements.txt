@@ -3,6 +3,3 @@ uvicorn
 pydantic
 streamlit
 requests
-transformers
-torch
-sentencepiece
